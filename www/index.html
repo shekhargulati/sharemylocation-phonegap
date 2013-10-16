@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Share my location &#9992;</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap -->
+<link href="css/bootstrap.css" rel="stylesheet" media="screen">
+<link href="css/jquery.loadmask.css" rel="stylesheet" media="screen">
+<style type="text/css">
+body {
+	/* padding-top: 70px; */
+	padding-bottom: 70px;
+}
+</style>
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+      <script src="../../assets/js/html5shiv.js"></script>
+      <script src="../../assets/js/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+	<div class="container">
+		<nav class="navbar navbar-default">
+			<div class="row">
+				<div class="col-xs-6">
+					<div class="navbar-header">
+						<a class="navbar-brand" href="#">Share My Location</a>
+					</div>
+				</div>
+
+				<div class="col-xs-6">
+					<a href="#post" class="btn btn-primary btn-lg pull-right"><span
+						class="glyphicon glyphicon-edit"></span> Post Status</a>
+				</div>
+
+			</div>
+			<ul class="nav nav-pills navbar-inverse nav-justified">
+				<li class="active"><a href="#">Home</a></li>
+				<li><a href="#search">Search</a></li>
+			</ul>
+		</nav>
+
+		<hr>
+
+		<div class="page"></div>
+
+	</div>
+
+	<script type="text/template" id="status-list-template">
+		
+			<% _.each(statuses , function(status) {%>
+				<div class="list-group">		
+					<a href="#statuses/<%= status.get('id') %>" class="list-group-item active">
+    					<h4 class="list-group-item-heading"><%= status.get('status') %></h4>
+    					<p class="list-group-item-text">By <%= status.get('postedBy') %> at <%= status.get('address') %>
+							<% _.each(status.get('hashTags') , function(hashTag) {%>
+								<span class="label label-default"><%= hashTag %></span>
+							<%});%>
+						<span class="text-right"><%= $.timeago(status.get('postedOn'))%></span>
+						</p>
+						
+						
+  					</a>
+				</div>
+			<%});%>
+		
+	</script>
+
+	<script type="text/template" id="status-geonear-list-template">
+			<% _.each(statuses , function(statusWithDistance) {%>
+				<div class="list-group">		
+					<a href="#statuses/<%= statusWithDistance.attributes.status.id %>" class="list-group-item active">
+    					<h4 class="list-group-item-heading"><%= statusWithDistance.attributes.status.status %></h4>
+						<h6><%= statusWithDistance.attributes.distance %>Km(s)</h6>
+    					<p class="list-group-item-text">
+							By <%= statusWithDistance.attributes.status.postedBy %> at <%= statusWithDistance.attributes.status.address %>
+							<% _.each(statusWithDistance.attributes.status.hashTags , function(hashTag) {%>
+								<span class="label label-default"><%= hashTag %></span>
+							<%});%>
+						<span class="text-right"><%= $.timeago(statusWithDistance.attributes.status.postedOn)%></span>
+						</p>
+						
+						
+  					</a>
+				</div>
+			<%});%>
+		
+	</script>
+
+	<script type="text/template" id="search-status-template">
+		<form id="searchForm" class="form-horizontal" role="form">
+				<div class="form-group">
+					<div class="col-lg-10">
+						<textarea id="hashtags" name="status" class="form-control" placeholder="Comma seperated list of hashtags"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-10">
+						<input type="text" class="form-control" id="postedBy"
+							placeholder="User name">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-offset-2 col-lg-10">
+						<div class="checkbox">
+							<label> <input id="useGeoNear" name="useGeoNear" type="checkbox"> Use GeoNear Search Functionality
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-offset-2 col-lg-10">
+						<button type="submit" class="btn btn-primary btn-lg">Search Status</button>
+					</div>
+				</div>
+			</form>
+
+			
+			<div id="results">
+				
+			</div>
+	</script>
+
+	<script type="text/template" id="status-post-template">
+		<form id="postForm" class="form-horizontal" role="form">
+				<div class="form-group">
+					<label for="status" class="col-lg-2 control-label">Status</label>
+					<div class="col-lg-10">
+						<textarea id="status" name="status" class="form-control" placeholder="What's on your mind?"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="name" class="col-lg-2 control-label">Name</label>
+					<div class="col-lg-10">
+						<input type="text" class="form-control" id="postedBy"
+							placeholder="Your name">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-offset-2 col-lg-10">
+						<div class="checkbox">
+							<label> <input id="useCurrentLocation" name="useCurrentLocation" type="checkbox"> Share my current location
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-offset-2 col-lg-10">
+						<button type="submit" class="btn btn-success btn-lg post-form">Post</button>
+					</div>
+				</div>
+			</form>
+	</script>
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/underscore-min.js"></script>
+	<script type="text/javascript" src="js/backbone-min.js"></script>
+	<script type="text/javascript" src="js/jquery.timeago.js"></script>
+	<script type="text/javascript" src="js/jquery.loadmask.min.js"></script>
+	<script type="text/javascript">
+		$('.nav-pills a').click(function(e) {
+			$(this).tab('show');
+		});
+	</script>
+	<script type="text/javascript" src="js/app.js"></script>
+</body>
+</html>
